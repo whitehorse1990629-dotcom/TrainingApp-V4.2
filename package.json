@@ -1,0 +1,19 @@
+{
+  "name": "training-app-v4",
+  "private": true,
+  "version": "4.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "lucide-react": "0.468.0",
+    "vite": "7.1.11",
+    "@vitejs/plugin-react": "5.0.4"
+  },
+  "devDependencies": {}
+}
