@@ -1,0 +1,12 @@
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
+html { background: #0B1120; }
+body { margin: 0; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+button, input { font: inherit; }
+button { touch-action: manipulation; }
+input, textarea, select { font-size: 16px; }
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+@media (display-mode: standalone) {
+  body { padding-top: env(safe-area-inset-top); }
+}
