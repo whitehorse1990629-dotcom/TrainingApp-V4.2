@@ -1,1 +1,11 @@
-
+{
+  "name": "TrainingApp V4.2",
+  "short_name": "TrainingApp",
+  "description": "1週間トレーニングメニュー・ダイエット管理アプリ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "orientation": "portrait"
+}
