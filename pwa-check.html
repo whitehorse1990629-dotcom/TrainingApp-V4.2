@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>PWA Check - TrainingApp V4.2</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #0b1220;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+    }
+    h1 { font-size: 24px; }
+    .card {
+      background: #151f33;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+    .ok { color: #42e6a4; }
+    .ng { color: #ff7070; }
+    .info { color: #ffd15c; }
+    code {
+      word-break: break-all;
+      color: #8ee7ff;
+    }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #36d9d5;
+      color: #071016;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🧪 TrainingApp V4.2<br>PWAチェック</h1>
+
+<div class="card">
+  <h2>基本情報</h2>
+  <div id="url"></div>
+  <div id="standalone"></div>
+  <div id="display"></div>
+</div>
+
+<div class="card">
+  <h2>Service Worker</h2>
+  <div id="sw"></div>
+  <div id="controller"></div>
+</div>
+
+<div class="card">
+  <h2>Manifest</h2>
+  <div id="manifest"></div>
+</div>
+
+<div class="card">
+  <h2>インストール判定</h2>
+  <div id="install"></div>
+</div>
+
+<div class="card">
+  <h2>現在のURL</h2>
+  <code id="currentUrl"></code>
+</div>
+
+<button onclick="location.reload()">🔄 再チェック</button>
+
+<script>
+const $ = id => document.getElementById(id);
+
+$("url").innerHTML =
+  "HTTPS: " + (location.protocol === "https:" ? "✅" : "❌");
+
+const isStandalone =
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.matchMedia("(display-mode: fullscreen)").matches ||
+  window.navigator.standalone === true;
+
+$("standalone").innerHTML =
+  "PWAとして起動中: " +
+  (isStandalone ? '<span class="ok">✅ YES</span>' : '<span class="info">❌ NO（通常ブラウザ）</span>');
+
+$("display").textContent =
+  "display-mode: " +
+  (isStandalone ? "standalone / fullscreen" : "browser");
+
+$("currentUrl").textContent = location.href;
+
+async function checkPWA() {
+
+  if (!("serviceWorker" in navigator)) {
+    $("sw").innerHTML =
+      '<span class="ng">❌ Service Worker API 非対応</span>';
+  } else {
+    try {
+      const registrations =
+        await navigator.serviceWorker.getRegistrations();
+
+      $("sw").innerHTML =
+        registrations.length > 0
+        ? '<span class="ok">✅ Service Worker 登録あり</span><br>' +
+          registrations.map(r =>
+            "scope: " + r.scope
+          ).join("<br>")
+        : '<span class="ng">❌ Service Worker 登録なし</span>';
+
+      $("controller").innerHTML =
+        navigator.serviceWorker.controller
+        ? '<span class="ok">✅ Service Worker が現在のページを制御中</span>'
+        : '<span class="info">⚠️ 現在のページはまだ制御されていません</span>';
+
+    } catch (e) {
+      $("sw").innerHTML =
+        '<span class="ng">❌ 確認エラー</span><br>' + e;
+    }
+  }
+
+  try {
+    const response = await fetch("/manifest.json", {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const manifest = await response.json();
+
+    $("manifest").innerHTML =
+      '<span class="ok">✅ manifest.json 読み込み成功</span><br>' +
+      "name: " + (manifest.name || "(なし)") + "<br>" +
+      "short_name: " + (manifest.short_name || "(なし)") + "<br>" +
+      "display: " + (manifest.display || "(なし)") + "<br>" +
+      "start_url: " + (manifest.start_url || "(なし)");
+
+  } catch (e) {
+    $("manifest").innerHTML =
+      '<span class="ng">❌ manifest.json 読み込み失敗</span><br>' +
+      e.message;
+  }
+
+  const installRelated =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  if (installRelated) {
+    $("install").innerHTML =
+      '<span class="ok">✅ インストール済み / PWAモードで起動中</span>';
+  } else if ("BeforeInstallPromptEvent" in window) {
+    $("install").innerHTML =
+      '<span class="info">ℹ️ ブラウザ上でインストール可能性あり</span>';
+  } else {
+    $("install").innerHTML =
+      '<span class="info">ℹ️ 通常ブラウザで表示中</span><br>' +
+      "Chromeのメニューから「アプリをインストール」または「ホーム画面に追加」を確認してください。";
+  }
+}
+
+checkPWA();
+</script>
+
+</body>
+</html>
